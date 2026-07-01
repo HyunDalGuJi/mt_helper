@@ -24,6 +24,8 @@ const CART_TABS = [
   { key: "donated", label: "🎁 기증", color: "#d97706" },
 ];
 
+const SHEET_TO_TAB = { "마트": "mart", "온라인": "online", "기증": "donated" };
+
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const fmt = (n) => Number(n).toLocaleString("ko-KR");
 
@@ -146,12 +148,14 @@ function CartItem({ item, onUpdate, onDelete, showPrice }) {
 // ── Cart View ──
 function CartView({ data, save }) {
   const [tab, setTab] = useState("mart");
+  const fileInputRef = useRef(null);
   const items = data.cart[tab] || [];
   const showPrice = tab !== "donated";
 
+  // ★ 신규 항목을 맨 위에 추가
   const addItem = () => {
     const newItem = { id: uid(), name: "", price: 0, quantity: 1 };
-    save({ ...data, cart: { ...data.cart, [tab]: [...items, newItem] } });
+    save({ ...data, cart: { ...data.cart, [tab]: [newItem, ...items] } });
   };
   const updateItem = (id, field, value) => {
     save({ ...data, cart: { ...data.cart, [tab]: items.map((i) => (i.id === id ? { ...i, [field]: value } : i)) } });
@@ -167,6 +171,7 @@ function CartView({ data, save }) {
   );
   const allQty = Object.values(data.cart).reduce((a, v) => a + v.reduce((sum, i) => sum + i.quantity, 0), 0);
 
+  // ── Excel Export ──
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
     let hasData = false;
@@ -194,6 +199,56 @@ function CartView({ data, save }) {
     XLSX.writeFile(wb, `장보기_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  // ── Excel Import ──
+  const importExcel = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const wb = XLSX.read(evt.target.result, { type: "array" });
+        const newCart = { ...data.cart };
+        let importedCount = 0;
+
+        wb.SheetNames.forEach((sheetName) => {
+          const tabKey = SHEET_TO_TAB[sheetName];
+          if (!tabKey) return;
+
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws);
+          const isD = tabKey === "donated";
+
+          const parsed = rows
+            .filter((r) => r["품목"] && r["품목"] !== "【합계】")
+            .map((r) => ({
+              id: uid(),
+              name: String(r["품목"] || ""),
+              price: isD ? 0 : (Number(r["단가(₩)"]) || 0),
+              quantity: Number(r["수량"]) || 1,
+            }));
+
+          if (parsed.length > 0) {
+            newCart[tabKey] = [...parsed, ...newCart[tabKey]];
+            importedCount += parsed.length;
+          }
+        });
+
+        if (importedCount > 0) {
+          save({ ...data, cart: newCart });
+          alert(`${importedCount}개 물품을 가져왔습니다.`);
+        } else {
+          alert("가져올 수 있는 데이터가 없습니다.\n시트 이름이 '마트', '온라인', '기증'이어야 합니다.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("파일을 읽는 중 오류가 발생했습니다.");
+      }
+      // reset input so same file can be re-imported
+      e.target.value = "";
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
   return (
     <>
       {/* Sub-tabs */}
@@ -215,12 +270,17 @@ function CartView({ data, save }) {
         })}
       </div>
 
+      {/* Add button - 상단 배치 */}
+      <button onClick={addItem} style={{ ...s.btn("#1b5e37"), width: "100%", marginBottom: 10, padding: "12px 0", borderRadius: 12, fontSize: 15 }}>
+        + 물품 추가
+      </button>
+
       {/* Items */}
       {items.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 20px", color: "#bbb" }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>{tab === "mart" ? "🛒" : tab === "online" ? "📦" : "🎁"}</div>
           <div style={{ fontSize: 14 }}>아직 추가된 물품이 없어요</div>
-          <div style={{ fontSize: 12, marginTop: 4 }}>아래 버튼으로 추가해보세요</div>
+          <div style={{ fontSize: 12, marginTop: 4 }}>위 버튼으로 추가해보세요</div>
         </div>
       ) : (
         items.map((item) => (
@@ -228,13 +288,22 @@ function CartView({ data, save }) {
         ))
       )}
 
-      {/* Add & Export */}
-      <button onClick={addItem} style={{ ...s.btn("#1b5e37"), width: "100%", marginTop: 4, padding: "12px 0", borderRadius: 12, fontSize: 15 }}>
-        + 물품 추가
-      </button>
-      <button onClick={exportExcel} style={{ ...s.btn("#f5f5f5", "#555"), width: "100%", marginTop: 8, padding: "10px 0", borderRadius: 12, fontSize: 13 }}>
-        📊 Excel로 내보내기
-      </button>
+      {/* Export & Import */}
+      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+        <button onClick={exportExcel} style={{ ...s.btn("#f5f5f5", "#555"), flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13 }}>
+          📤 Excel 내보내기
+        </button>
+        <button onClick={() => fileInputRef.current?.click()} style={{ ...s.btn("#f5f5f5", "#555"), flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13 }}>
+          📥 Excel 가져오기
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={importExcel}
+        />
+      </div>
 
       {/* Bottom bar */}
       <div style={s.bottomBar}>
@@ -285,7 +354,7 @@ function AlcoholCalc({ data, save }) {
 
   const addDrink = (preset) => {
     const d = { id: uid(), name: preset.name === "직접 입력" ? "" : preset.name, volumeMl: preset.volumeMl, abv: preset.abv, quantity: 1 };
-    setAlc({ drinks: [...drinks, d] });
+    setAlc({ drinks: [d, ...drinks] });
   };
   const updateDrink = (id, field, value) => {
     setAlc({ drinks: drinks.map((d) => (d.id === id ? { ...d, [field]: value } : d)) });

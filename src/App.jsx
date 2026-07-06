@@ -160,6 +160,126 @@ const Stepper = ({ value, onChange, min = 1, step = 1, decimal }) => (
 const RoNote = () => <div style={s.roNote}>👀 보기 전용 — 편집은 호스트만 가능합니다</div>;
 
 // ═══════════════════════════════════════
+// HELP CONTENT (역할별 사용 안내)
+// ═══════════════════════════════════════
+const HELP = {
+  guest: {
+    icon: "🙋", label: "게스트", color: "#0d9488",
+    intro: "게스트는 호스트가 등록해준 이름으로 입장해, 게임에 참여하고 정보를 확인합니다.",
+    sections: [
+      { t: "입장하기", items: [
+        "로그인 화면에서 게스트를 선택하고, 호스트가 등록해준 이름을 입력하면 입장됩니다.",
+        "비밀번호는 본인 이름과 동일합니다 (비워두면 자동으로 채워져요).",
+        "\"등록되지 않은 참가자\"라고 나오면 호스트에게 이름 등록을 요청하세요. 띄어쓰기·오타까지 정확히 같아야 합니다.",
+      ]},
+      { t: "무엇을 할 수 있나요", items: [
+        "📢 공지 확인 — 홈 상단 배너나 분위기&기타 → 공지에서 호스트 공지를 봅니다. 안 읽은 공지엔 New! 표시가 붙어요.",
+        "🎲 미니게임 참여 — 호스트가 문제를 내면(업다운·초성·자유출제) 답을 제출합니다.",
+        "🗳️ 투표 — 진행 중인 투표에 참여합니다. 1인 1표이고, 마감 전에는 선택을 바꿀 수 있어요.",
+        "👀 결과 보기 — 룰렛 당첨, 팀 배정(내 팀 ⭐), 점수판 순위, N빵 정산(내 금액 ⭐), 일정표를 확인합니다.",
+      ]},
+      { t: "알아두면 좋아요", items: [
+        "화면은 10초마다 자동 갱신됩니다. 즉시 새로고침하려면 상단 🔄 버튼을 누르세요.",
+        "편집·진행은 호스트만 할 수 있어요. 게스트 화면의 '👀 보기 전용' 항목은 눈으로 확인하는 용도입니다.",
+        "다른 기기·브라우저로 다시 접속해도 이름만 넣으면 내 투표·제출 기록이 그대로 유지됩니다.",
+        "🌙 버튼으로 다크 모드를 켤 수 있습니다 (내 기기에만 적용).",
+      ]},
+    ],
+  },
+  host: {
+    icon: "👑", label: "호스트", color: "#d97706",
+    intro: "호스트는 MT 전반을 준비하고 진행합니다. 참가자 등록부터 게임 진행, 정산까지 대부분의 편집 권한을 가집니다.",
+    sections: [
+      { t: "처음 시작하기", items: [
+        "로그인 화면에서 호스트를 선택하고 비밀번호를 정해 입력하세요. 최초 입력한 비밀번호가 그대로 호스트 비번으로 설정됩니다 (4자 이상).",
+        "이후에는 그 비밀번호로 로그인합니다. 잊어버리면 Admin이 초기화해줄 수 있어요.",
+        "가장 먼저 ⚙️ 관리 → 참가자 계정에서 참가자 이름을 등록하세요. 쉼표로 여러 명을 한 번에 넣을 수 있습니다.",
+      ]},
+      { t: "게임 & 진행", items: [
+        "🎯 룰렛 — 등록된 참가자 중 랜덤 １명을 뽑습니다. 결과가 게스트에게도 공유됩니다.",
+        "👥 팀배정 — 팀 수를 정하고 자동으로 섞어 배정합니다.",
+        "🏆 점수판 — 팀을 만들고 라운드별 점수를 입력하면 순위가 자동 집계됩니다.",
+        "🎲 미니게임 — 업다운·초성은 문제를 내면 게스트가 답을 제출하고, 자유출제는 직접 문제를 쓰고 정답자를 선택합니다. (정답 숫자는 호스트에게만 보여요.)",
+      ]},
+      { t: "정산 & 관리", items: [
+        "🛒 장바구니 — 마트·온라인·기증·사전구매로 나눠 물품을 관리합니다. 엑셀로 내보내기/가져오기가 가능해요.",
+        "🍶 주류계산 — 인원과 1인당 소주량으로 필요한 술을 계산합니다.",
+        "💸 N빵 — 지출 항목별로 금액과 제외 인원을 정하면 1인당 정산액이 나옵니다.",
+        "📅 일정 — 시간과 내용을 입력하면 게스트가 볼 수 있는 타임테이블이 됩니다.",
+      ]},
+      { t: "분위기 & 공지", items: [
+        "📢 공지 — 텍스트와 이미지로 공지를 올립니다. 이미지는 자동으로 축소 저장돼요.",
+        "❓ 아이스브레이킹 — 질문을 뽑습니다. 한 번 나온 질문은 다시 안 나오며, 초기화하면 전부 다시 나옵니다.",
+        "🗳️ 투표 — 주제와 선택지로 투표를 만들고 마감/재개할 수 있습니다.",
+      ]},
+      { t: "진행 팁", items: [
+        "호스트가 게임에 직접 참여하려면, 참가자 계정에 본인 이름을 등록한 뒤 시크릿 창에서 게스트로도 로그인하세요.",
+        "게임 데이터를 정리하려면 ⚙️ 관리 → 참가자 계정 하단의 '게임 데이터 초기화'를 쓰세요. 참가자 계정과 비밀번호는 유지됩니다.",
+      ]},
+    ],
+  },
+  admin: {
+    icon: "⚙️", label: "Admin", color: "#475569",
+    intro: "Admin은 시스템 관리자입니다. 호스트의 모든 권한에 더해 백업·복원·시스템 초기화 등 상위 관리 기능을 담당합니다.",
+    sections: [
+      { t: "입장하기", items: [
+        "로그인 화면에서 Admin을 선택하고 관리자 비밀번호를 입력합니다.",
+        "이 비밀번호는 Cloudflare의 ADMIN_PASSWORD 환경변수로 설정됩니다 (앱 데이터가 아니라 서버 설정).",
+        "Admin으로 관리 카테고리에 들어가면 🖥️ 시스템 탭이 먼저 열립니다.",
+      ]},
+      { t: "시스템 (Admin 전용)", items: [
+        "🖥️ System Info — 저장 용량, 참가자·공지·투표 수, 호스트 비번/테마 설정 여부 등을 확인합니다.",
+        "💾 백업(Export) — 전체 데이터를 JSON 파일로 내려받습니다. MT가 끝난 뒤 아카이브 용도로 보관할 수 있어요.",
+        "📥 복원(Import) — 백업 JSON을 올려 그 시점 상태로 되돌립니다.",
+        "🔑 호스트 비번 초기화 — 호스트가 비번을 잊었을 때 초기화합니다. 다음 호스트 로그인 시 새 비번이 설정돼요.",
+        "💥 시스템 전체 초기화 — 참가자 계정까지 모두 삭제합니다. 새 MT를 시작할 때 사용하세요.",
+      ]},
+      { t: "테마 설정", items: [
+        "🎨 앱 테마 — 로그인 화면의 배경 이미지, 팀명, MT 기간, 장소를 설정합니다. 배경 이미지는 자동 축소됩니다.",
+        "설정 후 로그아웃하면 로그인 화면에서 \"○○ MT에 오신 것을 환영합니다!\" 문구와 함께 확인할 수 있어요.",
+      ]},
+      { t: "참가자 계정 관리", items: [
+        "Admin이 참가자 계정 탭을 열려면 호스트 비밀번호가 필요합니다 (개인정보 보호). 브라우저를 닫으면 다시 잠겨요.",
+        "이 잠금은 관리 화면에만 적용됩니다. 팀배정·정산 등 다른 화면과 백업 파일에는 이름이 포함됩니다.",
+      ]},
+      { t: "게임 참여 팁", items: [
+        "Admin도 게임에 끼려면 참가자 계정에 이름을 등록하고, 시크릿 창에서 게스트로 로그인하면 됩니다.",
+        "Admin/호스트/게스트는 로그인 단위로 구분되며, 시크릿 창이나 다른 브라우저로 여러 역할을 동시에 쓸 수 있습니다.",
+      ]},
+    ],
+  },
+};
+
+function HelpView({ roleKey, onClose, embedded }) {
+  const h = HELP[roleKey];
+  return (
+    <div style={embedded ? {} : { padding: "4px 2px" }}>
+      <div style={{ ...s.card, background: `${h.color}0d`, border: `1.5px solid ${h.color}44` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ fontSize: 30 }}>{h.icon}</div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: h.color }}>{h.label} 사용법</div>
+            <div style={{ fontSize: 12.5, color: "#666", marginTop: 3, lineHeight: 1.5 }}>{h.intro}</div>
+          </div>
+        </div>
+      </div>
+      {h.sections.map((sec, i) => (
+        <div key={i} style={s.card}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: h.color }}>{sec.t}</div>
+          {sec.items.map((it, j) => (
+            <div key={j} style={{ display: "flex", gap: 8, padding: "5px 0", fontSize: 13, lineHeight: 1.55, borderBottom: j < sec.items.length - 1 ? "1px solid #f4f4f5" : "none" }}>
+              <span style={{ color: h.color, flexShrink: 0 }}>•</span>
+              <span>{it}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+      {onClose && <button onClick={onClose} style={{ ...s.btn("#f1f5f9", "#475569"), width: "100%", borderRadius: 12, marginTop: 2 }}>닫기</button>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════
 function LoginView({ onLogin, dark, toggleDark }) {
@@ -169,6 +289,7 @@ function LoginView({ onLogin, dark, toggleDark }) {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [theme, setTheme] = useState(null);
+  const [helpRole, setHelpRole] = useState(null);
 
   useEffect(() => { api.req("theme").then(setTheme).catch(() => setTheme({})); }, []);
 
@@ -239,8 +360,24 @@ function LoginView({ onLogin, dark, toggleDark }) {
           <button onClick={submit} disabled={busy} style={{ ...s.btn("#7c3aed"), width: "100%", marginTop: 12, padding: "13px", borderRadius: 12, fontSize: 15, opacity: busy ? 0.6 : 1 }}>
             {busy ? "확인 중..." : "입장하기"}
           </button>
+          <button onClick={() => setHelpRole(role)} style={{ background: "none", border: "none", color: "#7c3aed", fontSize: 12.5, cursor: "pointer", textDecoration: "underline", width: "100%", marginTop: 12, padding: 0 }}>
+            ❓ {HELP[role].label} 사용법 보기
+          </button>
         </div>
       </div>
+
+      {helpRole && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.55)", zIndex: 50, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto", padding: "24px 0" }} onClick={() => setHelpRole(null)}>
+          <div style={{ background: "#f3f4f6", borderRadius: 16, width: "100%", maxWidth: 480, margin: "0 14px", padding: 14, boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+              {["guest", "host", "admin"].map(rk => (
+                <button key={rk} onClick={() => setHelpRole(rk)} style={{ flex: 1, padding: "9px 4px", borderRadius: 10, border: helpRole === rk ? `2px solid ${HELP[rk].color}` : "2px solid #e5e7eb", background: helpRole === rk ? `${HELP[rk].color}12` : "#fff", color: helpRole === rk ? HELP[rk].color : "#888", fontSize: 12.5, fontWeight: helpRole === rk ? 700 : 500, cursor: "pointer" }}>{HELP[rk].icon} {HELP[rk].label}</button>
+              ))}
+            </div>
+            <HelpView roleKey={helpRole} onClose={() => setHelpRole(null)} embedded />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1111,6 +1248,7 @@ export default function App() {
   const [saved, setSaved] = useState(false);
   const [fatal, setFatal] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [dark, toggleDark] = useDark();
   const timer = useRef(null);
   const pending = useRef({});
@@ -1224,6 +1362,7 @@ export default function App() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             {saved && <span style={{ fontSize: 11, color: "#86efac" }}>저장됨 ✓</span>}
+            <button onClick={() => setShowHelp(true)} style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 8, padding: "5px 8px", fontSize: 14, cursor: "pointer" }} title="사용법">❓</button>
             <button onClick={toggleDark} style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 8, padding: "5px 8px", fontSize: 14, cursor: "pointer" }} title="다크 모드">{dark ? "☀️" : "🌙"}</button>
             <button onClick={() => refresh(true)} style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 8, padding: "5px 8px", fontSize: 14, cursor: "pointer", color: "#fff", opacity: syncing ? 0.5 : 1 }} title="새로고침">{syncing ? "⏳" : "🔄"}</button>
             {cat && visibleCats.filter(c => c.key !== cat).map(c => (
@@ -1269,6 +1408,14 @@ export default function App() {
         </div>
         <div style={{ flex: 1, padding: "12px 14px 24px", overflowY: "auto" }}>{renderFeature()}</div>
       </>}
+
+      {showHelp && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.55)", zIndex: 50, display: "flex", justifyContent: "center", alignItems: "flex-start", overflowY: "auto", padding: "24px 0" }} onClick={() => setShowHelp(false)}>
+          <div style={{ background: "#f3f4f6", borderRadius: 16, width: "100%", maxWidth: 480, margin: "0 14px", padding: 14, boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }} onClick={e => e.stopPropagation()}>
+            <HelpView roleKey={role} onClose={() => setShowHelp(false)} embedded />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

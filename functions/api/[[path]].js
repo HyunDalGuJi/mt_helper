@@ -40,7 +40,7 @@ const initialGame = () => ({
   votes: [],
 });
 const initialState = () => ({
-  config: { hostPw: null, createdAt: Date.now() },
+  config: { hostPw: null, createdAt: Date.now(), lockGuest: false, lockHost: false },
   theme: { bgImg: null, teamName: "", dateStart: "", dateEnd: "", place: "" },
   ...initialGame(),
 });
@@ -89,6 +89,7 @@ export async function onRequest({ request, env, params }) {
       return j({ token: enc({ role: "admin", name: "관리자" }), role: "admin", name: "관리자", state: sanitize("admin") });
     }
     if (r === "host") {
+      if (state.config.lockHost) return j({ error: "현재 Admin이 호스트 접속을 잠가두었습니다." }, 403);
       if (!state.config.hostPw) {
         if (p.length < 4) return j({ error: "첫 로그인입니다. 4자 이상의 호스트 비밀번호를 정해서 입력하세요." }, 400);
         state.config.hostPw = p;
@@ -99,6 +100,7 @@ export async function onRequest({ request, env, params }) {
       return j({ token: enc({ role: "host", name: "호스트" }), role: "host", name: "호스트", state: sanitize("host") });
     }
     if (r === "guest") {
+      if (state.config.lockGuest) return j({ error: "현재 Admin이 게스트 접속을 잠가두었습니다." }, 403);
       if (!n) return j({ error: "이름을 입력하세요." }, 400);
       const found = state.members.find((m) => m.name === n);
       if (!found) return j({ error: "등록되지 않은 참가자입니다. 호스트에게 등록을 요청하세요." }, 401);
@@ -109,7 +111,7 @@ export async function onRequest({ request, env, params }) {
   }
 
   // ── 테마 조회 (공개 — 로그인 화면에서 사용) ──
-  if (path === "theme" && method === "GET") return j(state.theme || {});
+  if (path === "theme" && method === "GET") return j({ ...(state.theme || {}), lockGuest: !!state.config.lockGuest, lockHost: !!state.config.lockHost });
 
   // 이하 모든 경로는 로그인 필요
   if (!role) return j({ error: "로그인이 필요합니다." }, 401);
@@ -185,6 +187,12 @@ export async function onRequest({ request, env, params }) {
       if ((body.password || "") !== state.config.hostPw) return j({ error: "호스트 비밀번호가 틀렸습니다." }, 401);
       return j({ ok: true });
     }
+    if (path === "admin/lock" && method === "POST") {
+      if (typeof body.lockGuest === "boolean") state.config.lockGuest = body.lockGuest;
+      if (typeof body.lockHost === "boolean") state.config.lockHost = body.lockHost;
+      await put();
+      return j({ ok: true, lockGuest: !!state.config.lockGuest, lockHost: !!state.config.lockHost });
+    }
     if (path === "admin/export" && method === "GET") {
       // 전체 원본 DB (호스트 비번 포함)
       return j({ exportedAt: new Date().toISOString(), state });
@@ -211,6 +219,8 @@ export async function onRequest({ request, env, params }) {
         sbRounds: state.sb.rounds.length,
         hostPwSet: !!state.config.hostPw,
         themeSet: !!(state.theme && (state.theme.teamName || state.theme.bgImg)),
+        lockGuest: !!state.config.lockGuest,
+        lockHost: !!state.config.lockHost,
         adminPwCustom: !!env.ADMIN_PASSWORD,
         createdAt: state.config.createdAt,
         serverTime: Date.now(),

@@ -312,6 +312,7 @@ function LoginView({ onLogin, dark, toggleDark }) {
   const hasBg = !!t.bgImg;
   const fD = (d) => (d || "").replace(/-/g, ".");
   const period = t.dateStart || t.dateEnd ? `${fD(t.dateStart) || "?"} ~ ${fD(t.dateEnd) || "?"}` : null;
+  const locked = (role === "guest" && t.lockGuest) || (role === "host" && t.lockHost);
 
   return (
     <div style={{ ...s.page, position: "relative", justifyContent: "center", padding: "40px 20px", overflow: "hidden", minHeight: "100vh", boxSizing: "border-box" }}>
@@ -326,14 +327,14 @@ function LoginView({ onLogin, dark, toggleDark }) {
           {!hasBg && <div style={{ fontSize: 48 }}>🏕️</div>}
           {t.teamName ? <>
             <div style={{ fontSize: 30, fontWeight: 800, marginTop: 4, textShadow: hasBg ? "0 2px 10px rgba(0,0,0,0.45)" : "none", lineHeight: 1.3 }}>{t.teamName}</div>
-            <div style={{ fontSize: 16, fontWeight: 600, marginTop: 8, textShadow: hasBg ? "0 1px 6px rgba(0,0,0,0.4)" : "none" }}>MT에 오신 것을 환영합니다! 🎉</div>
+            <div style={{ fontSize: 16, fontWeight: 600, marginTop: 8, textShadow: hasBg ? "0 1px 6px rgba(0,0,0,0.4)" : "none" }}>{t.welcome || "MT에 오신 것을 환영합니다! 🎉"}</div>
           </> : <>
             <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4, textShadow: hasBg ? "0 2px 10px rgba(0,0,0,0.45)" : "none" }}>MT 도우미</div>
             <div style={{ fontSize: 13, opacity: hasBg ? 0.9 : 0.55, marginTop: 4 }}>준비부터 게임까지 한 곳에서</div>
           </>}
           {(period || t.place) && <div style={{ marginTop: 12, fontSize: 13.5, fontWeight: 500, textShadow: hasBg ? "0 1px 6px rgba(0,0,0,0.4)" : "none", opacity: hasBg ? 0.95 : 0.75, display: "flex", flexDirection: "column", gap: 4 }}>
             {period && <div>📅 {period}</div>}
-            {t.place && <div>📍 {t.place}</div>}
+            {t.place && <div>📍 {t.placeUrl ? <a href={t.placeUrl} target="_blank" rel="noopener noreferrer" style={{ color: hasBg ? "#fff" : "#7c3aed", textDecoration: "underline" }}>{t.place}</a> : t.place}</div>}
           </div>}
         </div>
 
@@ -346,19 +347,24 @@ function LoginView({ onLogin, dark, toggleDark }) {
           ))}
         </div>
         <div style={s.card}>
+          {locked && <div style={{ padding: "12px 14px", background: "#f1f5f9", borderRadius: 10, marginBottom: 12, textAlign: "center", border: "1.5px solid #cbd5e1" }}>
+            <div style={{ fontSize: 22 }}>🔒</div>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: "#475569", marginTop: 4 }}>현재 Admin이 접속을 잠궈두었습니다!</div>
+            <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 3 }}>잠시 후 다시 시도해주세요</div>
+          </div>}
           {role === "guest" && <>
             <div style={s.label}>이름</div>
-            <input style={{ ...s.input("100%"), marginBottom: 10 }} placeholder="호스트가 등록한 이름" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} />
-            <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>💡 비밀번호는 본인 이름과 동일합니다 (자동 입력됨)</div>
+            <input disabled={locked} style={{ ...s.input("100%"), marginBottom: 10, background: locked ? "#e5e7eb" : "#fafafa", color: locked ? "#9ca3af" : "inherit", cursor: locked ? "not-allowed" : "text" }} placeholder={locked ? "접속이 잠겨 있습니다" : "호스트가 등록한 이름"} value={locked ? "" : name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} />
+            {!locked && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>💡 비밀번호는 본인 이름과 동일합니다 (자동 입력됨)</div>}
           </>}
           {role !== "guest" && <>
             <div style={s.label}>{role === "host" ? "호스트 비밀번호" : "관리자 비밀번호"}</div>
-            <input style={{ ...s.input("100%"), marginBottom: 6 }} type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} />
-            {role === "host" && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>💡 최초 로그인 시 입력한 비밀번호가 그대로 설정됩니다 (4자 이상)</div>}
+            <input disabled={locked} type="password" style={{ ...s.input("100%"), marginBottom: 6, background: locked ? "#e5e7eb" : "#fafafa", color: locked ? "#9ca3af" : "inherit", cursor: locked ? "not-allowed" : "text" }} placeholder={locked ? "접속이 잠겨 있습니다" : "비밀번호"} value={locked ? "" : pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} />
+            {role === "host" && !locked && <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>💡 최초 로그인 시 입력한 비밀번호가 그대로 설정됩니다 (4자 이상)</div>}
           </>}
           {err && <div style={{ padding: "8px 10px", background: "#fee2e2", borderRadius: 8, fontSize: 13, color: "#dc2626", marginTop: 6 }}>{err}</div>}
-          <button onClick={submit} disabled={busy} style={{ ...s.btn("#7c3aed"), width: "100%", marginTop: 12, padding: "13px", borderRadius: 12, fontSize: 15, opacity: busy ? 0.6 : 1 }}>
-            {busy ? "확인 중..." : "입장하기"}
+          <button onClick={submit} disabled={busy || locked} style={{ ...s.btn(locked ? "#cbd5e1" : "#7c3aed"), width: "100%", marginTop: 12, padding: "13px", borderRadius: 12, fontSize: 15, opacity: (busy || locked) ? 0.6 : 1, cursor: locked ? "not-allowed" : "pointer" }}>
+            {locked ? "🔒 접속 잠김" : busy ? "확인 중..." : "입장하기"}
           </button>
           <button onClick={() => setHelpRole(role)} style={{ background: "none", border: "none", color: "#7c3aed", fontSize: 12.5, cursor: "pointer", textDecoration: "underline", width: "100%", marginTop: 12, padding: 0 }}>
             ❓ {HELP[role].label} 사용법 보기
@@ -463,7 +469,7 @@ function SystemView({ S, save }) {
   const bgRef = useRef(null);
   const [confirmWipe, setConfirmWipe] = useState(false);
   // 테마 편집 로컬 상태 (저장 버튼 눌러야 서버 반영)
-  const [th, setTh] = useState(() => ({ bgImg: null, teamName: "", dateStart: "", dateEnd: "", place: "", ...(S?.theme || {}) }));
+  const [th, setTh] = useState(() => ({ bgImg: null, teamName: "", welcome: "", dateStart: "", dateEnd: "", place: "", placeUrl: "", ...(S?.theme || {}) }));
   const [thBusy, setThBusy] = useState(false);
 
   const attachBg = async (e) => {
@@ -483,8 +489,16 @@ function SystemView({ S, save }) {
     setThBusy(false);
   };
 
-  const loadInfo = async () => { setErr(""); try { setInfo(await api.req("admin/sysinfo")); } catch (e) { setErr(e.message); } };
+  const loadInfo = async () => { setErr(""); try { const d = await api.req("admin/sysinfo"); setInfo(d); setLock({ guest: d.lockGuest, host: d.lockHost }); } catch (e) { setErr(e.message); } };
   useEffect(() => { loadInfo(); }, []);
+  const [lock, setLock] = useState({ guest: false, host: false });
+  const toggleLock = async (which) => {
+    setErr("");
+    const next = { ...lock, [which]: !lock[which] };
+    setLock(next); // 낙관적
+    try { await api.req("admin/lock", "POST", { lockGuest: next.guest, lockHost: next.host }); }
+    catch (e) { setErr(e.message); setLock(lock); }
+  };
 
   const doExport = async () => {
     try {
@@ -526,6 +540,8 @@ function SystemView({ S, save }) {
         <div style={s.section}>🎨 앱 테마 (로그인 화면)</div>
         <div style={s.label}>프로젝트 팀명</div>
         <input style={{ ...s.input("100%"), marginBottom: 10 }} placeholder="예: 컴퓨터공학과 26학번" maxLength={40} value={th.teamName} onChange={e => setTh(p => ({ ...p, teamName: e.target.value }))} />
+        <div style={s.label}>환영 문구</div>
+        <input style={{ ...s.input("100%"), marginBottom: 10 }} placeholder="MT에 오신 것을 환영합니다! 🎉" maxLength={60} value={th.welcome} onChange={e => setTh(p => ({ ...p, welcome: e.target.value }))} />
         <div style={s.label}>MT 기간</div>
         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 10 }}>
           <input style={{ ...s.input("auto"), flex: 1 }} type="date" value={th.dateStart} onChange={e => setTh(p => ({ ...p, dateStart: e.target.value }))} />
@@ -533,7 +549,9 @@ function SystemView({ S, save }) {
           <input style={{ ...s.input("auto"), flex: 1 }} type="date" value={th.dateEnd} onChange={e => setTh(p => ({ ...p, dateEnd: e.target.value }))} />
         </div>
         <div style={s.label}>장소명</div>
-        <input style={{ ...s.input("100%"), marginBottom: 10 }} placeholder="예: 가평 OO펜션" maxLength={40} value={th.place} onChange={e => setTh(p => ({ ...p, place: e.target.value }))} />
+        <input style={{ ...s.input("100%"), marginBottom: 8 }} placeholder="예: 가평 OO펜션" maxLength={40} value={th.place} onChange={e => setTh(p => ({ ...p, place: e.target.value }))} />
+        <div style={s.label}>장소 링크 (선택 — 지도 URL)</div>
+        <input style={{ ...s.input("100%"), marginBottom: 10 }} placeholder="https://naver.me/... (비워두면 링크 없음)" value={th.placeUrl} onChange={e => setTh(p => ({ ...p, placeUrl: e.target.value }))} />
         <div style={s.label}>배경 이미지</div>
         {th.bgImg ? <div style={{ position: "relative", marginBottom: 8 }}>
           <img src={th.bgImg} alt="배경 미리보기" style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 10, display: "block" }} />
@@ -541,7 +559,24 @@ function SystemView({ S, save }) {
         </div> : <button onClick={() => bgRef.current?.click()} disabled={thBusy} style={{ ...s.btn("#f5f5f5", "#555"), width: "100%", borderRadius: 10, marginBottom: 8, fontSize: 13 }}>{thBusy ? "처리 중..." : "🖼️ 이미지 선택 (자동 축소, 최대 1200px)"}</button>}
         <input ref={bgRef} type="file" accept="image/*" style={{ display: "none" }} onChange={attachBg} />
         <button onClick={saveTheme} disabled={thBusy} style={{ ...s.btn("#475569"), width: "100%", borderRadius: 10 }}>{thBusy ? "저장 중..." : "테마 저장"}</button>
-        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>💡 로그인 화면에 "{th.teamName || "팀명"} MT에 오신 것을 환영합니다!" 문구와 함께 표시됩니다.</div>
+        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>💡 로그인 화면에 팀명·환영 문구·기간·장소가 표시됩니다. 장소 링크를 넣으면 장소명이 눌러지는 링크가 됩니다.</div>
+      </div>
+
+      <div style={s.card}>
+        <div style={s.section}>🔒 로그인 잠금</div>
+        <div style={{ fontSize: 12.5, color: "#666", marginBottom: 12, lineHeight: 1.6 }}>잠그면 해당 역할은 로그인 화면에서 입력칸이 막히고 "Admin이 접속을 잠궈두었습니다" 안내가 뜹니다. <b>배포 직후 미리 들어오지 못하게</b> 막고, 준비가 되면 순서대로 풀어주세요. (Admin은 잠금과 무관하게 항상 로그인 가능)</div>
+        {[{ k: "host", label: "👑 호스트", desc: "세팅할 호스트만 먼저 열어줄 때 해제" }, { k: "guest", label: "🙋 게스트", desc: "호스트 세팅이 끝나면 마지막에 해제" }].map(row => (
+          <div key={row.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid #f1f5f9" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{row.label}</div>
+              <div style={{ fontSize: 11.5, color: "#94a3b8", marginTop: 2 }}>{row.desc}</div>
+            </div>
+            <button onClick={() => toggleLock(row.k)} style={{ border: "none", cursor: "pointer", borderRadius: 999, padding: "7px 16px", fontSize: 13, fontWeight: 700, background: lock[row.k] ? "#fee2e2" : "#dcfce7", color: lock[row.k] ? "#dc2626" : "#16a34a", minWidth: 92 }}>
+              {lock[row.k] ? "🔒 잠김" : "🔓 열림"}
+            </button>
+          </div>
+        ))}
+        {(lock.guest || lock.host) && <div style={{ marginTop: 10, padding: "8px 10px", background: "#fef2f2", borderRadius: 8, fontSize: 12, color: "#b91c1c" }}>현재 잠긴 역할: {[lock.host && "호스트", lock.guest && "게스트"].filter(Boolean).join(", ")}</div>}
       </div>
 
       <div style={s.card}>
@@ -558,6 +593,7 @@ function SystemView({ S, save }) {
           <Info l="점수판 (팀/라운드)" v={`${info.sbTeams} / ${info.sbRounds}`} />
           <Info l="호스트 비밀번호" v={info.hostPwSet ? "설정됨" : "미설정"} />
           <Info l="테마" v={info.themeSet ? "설정됨 🎨" : "미설정 (기본 화면)"} />
+          <Info l="로그인 잠금" v={info.lockHost || info.lockGuest ? `🔒 ${[info.lockHost && "호스트", info.lockGuest && "게스트"].filter(Boolean).join(", ")}` : "없음"} />
           <Info l="ADMIN_PASSWORD 환경변수" v={info.adminPwCustom ? "설정됨 ✅" : "⚠️ 미설정 (기본값 'admin' 사용 중)"} />
           <Info l="방 생성일" v={new Date(info.createdAt).toLocaleString("ko-KR")} />
           <Info l="서버 시간" v={new Date(info.serverTime).toLocaleString("ko-KR")} />

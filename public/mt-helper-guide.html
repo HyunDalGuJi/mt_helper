@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MT 도우미 · 사용 안내서</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --ink-soft: #52606d;
+    --line: #e4e7eb;
+    --paper: #fbfaf7;
+    --card: #ffffff;
+    --guest: #0d9488;
+    --host: #d97706;
+    --admin: #475569;
+    --brand: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Malgun Gothic', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px 80px; }
+
+  /* Hero */
+  header.hero {
+    text-align: center;
+    padding: 56px 22px 40px;
+    background: linear-gradient(160deg, #1e293b, #334155);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+    margin-bottom: 8px;
+  }
+  .hero .tent { font-size: 46px; }
+  .hero h1 { font-size: 30px; font-weight: 800; margin-top: 6px; letter-spacing: -0.02em; }
+  .hero p { font-size: 14px; opacity: 0.72; margin-top: 8px; }
+  .hero .tagchips { margin-top: 18px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hero .chip {
+    font-size: 12.5px; font-weight: 600; padding: 6px 13px; border-radius: 999px;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* Intro card */
+  .intro {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; margin: 24px 0 12px; font-size: 14.5px; color: var(--ink-soft);
+  }
+  .intro b { color: var(--ink); }
+  .intro .flow { margin-top: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; }
+  .intro .flow span.step { background: #f0f4f8; border-radius: 8px; padding: 5px 11px; font-weight: 600; color: var(--ink); }
+  .intro .flow span.arw { color: #9aa5b1; font-weight: 700; }
+
+  /* Role nav */
+  nav.roles { display: flex; gap: 10px; margin: 22px 0 8px; position: sticky; top: 0; padding: 12px 0; background: var(--paper); z-index: 10; }
+  nav.roles a {
+    flex: 1; text-align: center; text-decoration: none; padding: 12px 6px; border-radius: 12px;
+    font-weight: 700; font-size: 14px; border: 2px solid var(--line); background: #fff; color: var(--ink-soft);
+    transition: transform 0.12s;
+  }
+  nav.roles a:hover { transform: translateY(-2px); }
+  nav.roles a.g { border-color: var(--guest); color: var(--guest); }
+  nav.roles a.h { border-color: var(--host); color: var(--host); }
+  nav.roles a.a { border-color: var(--admin); color: var(--admin); }
+
+  /* Role section */
+  section.role { margin-top: 40px; scroll-margin-top: 76px; }
+  .role-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: 16px 16px 0 0; color: #fff; }
+  .role.guest .role-head { background: linear-gradient(120deg, #0d9488, #14b8a6); }
+  .role.host  .role-head { background: linear-gradient(120deg, #d97706, #f59e0b); }
+  .role.admin .role-head { background: linear-gradient(120deg, #475569, #64748b); }
+  .role-head .ic { font-size: 34px; }
+  .role-head h2 { font-size: 21px; font-weight: 800; }
+  .role-head .sub { font-size: 13px; opacity: 0.9; margin-top: 2px; font-weight: 500; }
+
+  .role-body { background: var(--card); border: 1px solid var(--line); border-top: none; border-radius: 0 0 16px 16px; padding: 8px 20px 20px; }
+  .block { padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .block:last-child { border-bottom: none; }
+  .block h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .block h3::before { content: ""; width: 4px; height: 15px; border-radius: 2px; background: currentColor; opacity: 0.5; }
+  .role.guest .block h3 { color: var(--guest); }
+  .role.host  .block h3 { color: var(--host); }
+  .role.admin .block h3 { color: var(--admin); }
+  ul.items { list-style: none; }
+  ul.items li { position: relative; padding: 5px 0 5px 20px; font-size: 14px; color: var(--ink); }
+  ul.items li::before { content: "›"; position: absolute; left: 4px; top: 4px; font-weight: 800; opacity: 0.4; }
+  ul.items li b { font-weight: 700; }
+  .role.guest ul.items li b { color: var(--guest); }
+  .role.host  ul.items li b { color: var(--host); }
+  .role.admin ul.items li b { color: var(--admin); }
+
+  .callout {
+    margin-top: 14px; padding: 12px 15px; border-radius: 12px; font-size: 13px; line-height: 1.6;
+    background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+  }
+  .callout.tip { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+
+  /* FAQ */
+  .faq { margin-top: 40px; }
+  .faq h2 { font-size: 20px; font-weight: 800; margin-bottom: 14px; }
+  details {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 4px 18px; margin-bottom: 10px;
+  }
+  details summary { font-weight: 600; font-size: 14.5px; padding: 12px 0; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; font-size: 20px; color: #9aa5b1; font-weight: 400; }
+  details[open] summary::after { content: "−"; }
+  details p { padding: 0 0 14px; font-size: 13.5px; color: var(--ink-soft); }
+
+  footer { text-align: center; margin-top: 48px; font-size: 12px; color: #9aa5b1; }
+
+  @media (max-width: 520px) {
+    .hero h1 { font-size: 25px; }
+    nav.roles { gap: 6px; }
+    nav.roles a { font-size: 12.5px; padding: 10px 4px; }
+    .role-head .ic { font-size: 28px; }
+    .role-head h2 { font-size: 18px; }
+  }
+  @media print {
+    nav.roles { display: none; }
+    header.hero { border-radius: 0; }
+    section.role, details { break-inside: avoid; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="tent">🏕️</div>
+  <h1>MT 도우미 사용 안내서</h1>
+  <p>준비부터 게임, 정산까지 — 한 곳에서 함께하는 MT</p>
+  <div class="tagchips">
+    <span class="chip">🙋 게스트</span>
+    <span class="chip">👑 호스트</span>
+    <span class="chip">⚙️ Admin</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    이 앱은 <b>세 가지 역할</b>로 나뉩니다. 접속 주소는 모두 같고, 로그인할 때 역할을 고릅니다.
+    <b>호스트</b>가 MT를 준비·진행하고, <b>게스트</b>는 이름으로 입장해 게임에 참여하며, <b>Admin</b>은 시스템을 관리합니다.
+    <div class="flow">
+      <span class="step">호스트가 준비</span><span class="arw">→</span>
+      <span class="step">게스트 입장</span><span class="arw">→</span>
+      <span class="step">함께 게임·정산</span>
+    </div>
+  </div>
+
+  <nav class="roles">
+    <a class="g" href="#guest">🙋 게스트</a>
+    <a class="h" href="#host">👑 호스트</a>
+    <a class="a" href="#admin">⚙️ Admin</a>
+  </nav>
+
+  <!-- GUEST -->
+  <section class="role guest" id="guest">
+    <div class="role-head">
+      <div class="ic">🙋</div>
+      <div>
+        <h2>게스트</h2>
+        <div class="sub">호스트가 등록해준 이름으로 입장해, 게임에 참여하고 정보를 확인합니다</div>
+      </div>
+    </div>
+    <div class="role-body">
+      <div class="block">
+        <h3>입장하기</h3>
+        <ul class="items">
+          <li>로그인 화면에서 <b>게스트</b>를 선택하고, 호스트가 등록해준 <b>이름</b>을 입력하면 입장됩니다.</li>
+          <li>비밀번호는 <b>본인 이름과 동일</b>합니다. 비워두면 자동으로 채워져요.</li>
+          <li>"등록되지 않은 참가자"라고 나오면 호스트에게 등록을 요청하세요. 띄어쓰기·오타까지 정확히 같아야 합니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>무엇을 할 수 있나요</h3>
+        <ul class="items">
+          <li><b>📢 공지 확인</b> — 홈 상단 배너나 분위기&기타 → 공지에서 호스트 공지를 봅니다. 안 읽은 공지엔 New! 표시가 붙어요.</li>
+          <li><b>🎲 미니게임 참여</b> — 호스트가 문제를 내면(업다운·초성·자유출제) 답을 제출합니다.</li>
+          <li><b>🗳️ 투표</b> — 진행 중인 투표에 참여합니다. 1인 1표이고, 마감 전에는 선택을 바꿀 수 있어요.</li>
+          <li><b>👀 결과 보기</b> — 룰렛 당첨, 팀 배정(내 팀 ⭐), 점수판 순위, N빵 정산(내 금액 ⭐), 일정표를 확인합니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>알아두면 좋아요</h3>
+        <ul class="items">
+          <li>화면은 <b>10초마다 자동 갱신</b>됩니다. 즉시 새로고침하려면 상단 🔄 버튼을 누르세요.</li>
+          <li>편집·진행은 호스트만 할 수 있어요. '👀 보기 전용' 항목은 눈으로 확인하는 용도입니다.</li>
+          <li>다른 기기·브라우저로 다시 접속해도 이름만 넣으면 내 투표·제출 기록이 그대로 유지됩니다.</li>
+          <li>🌙 버튼으로 다크 모드를 켤 수 있습니다 (내 기기에만 적용).</li>
+        </ul>
+        <div class="callout tip">💡 로그인 화면과 앱 상단의 <b>❓ 버튼</b>을 누르면 언제든 이 사용법을 다시 볼 수 있어요.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOST -->
+  <section class="role host" id="host">
+    <div class="role-head">
+      <div class="ic">👑</div>
+      <div>
+        <h2>호스트</h2>
+        <div class="sub">MT 전반을 준비하고 진행합니다. 참가자 등록부터 게임·정산까지 대부분의 편집 권한을 가집니다</div>
+      </div>
+    </div>
+    <div class="role-body">
+      <div class="block">
+        <h3>처음 시작하기</h3>
+        <ul class="items">
+          <li>로그인 화면에서 <b>호스트</b>를 선택하고 비밀번호를 정해 입력하세요. <b>최초 입력한 비밀번호가 그대로 설정</b>됩니다 (4자 이상).</li>
+          <li>이후에는 그 비밀번호로 로그인합니다. 잊어버리면 Admin이 초기화해줄 수 있어요.</li>
+          <li>가장 먼저 <b>⚙️ 관리 → 참가자 계정</b>에서 이름을 등록하세요. 쉼표로 여러 명을 한 번에 넣을 수 있습니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>게임 &amp; 진행</h3>
+        <ul class="items">
+          <li><b>🎯 룰렛</b> — 등록된 참가자 중 랜덤 1명을 뽑습니다. 결과가 게스트에게도 공유됩니다.</li>
+          <li><b>👥 팀배정</b> — 팀 수를 정하고 자동으로 섞어 배정합니다.</li>
+          <li><b>🏆 점수판</b> — 팀을 만들고 라운드별 점수를 입력하면 순위가 자동 집계됩니다.</li>
+          <li><b>🎲 미니게임</b> — 업다운·초성은 문제를 내면 게스트가 답을 제출하고, 자유출제는 직접 문제를 쓰고 정답자를 선택합니다. 정답은 호스트에게만 보여요.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>정산 &amp; 관리</h3>
+        <ul class="items">
+          <li><b>🛒 장바구니</b> — 마트·온라인·기증·사전구매로 나눠 관리합니다. 엑셀 내보내기/가져오기가 가능해요.</li>
+          <li><b>🍶 주류계산</b> — 인원과 1인당 소주량으로 필요한 술을 계산합니다.</li>
+          <li><b>💸 N빵</b> — 지출 항목별 금액과 제외 인원을 정하면 1인당 정산액이 나옵니다.</li>
+          <li><b>📅 일정</b> — 시간과 내용을 입력하면 게스트가 볼 수 있는 타임테이블이 됩니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>분위기 &amp; 공지</h3>
+        <ul class="items">
+          <li><b>📢 공지</b> — 텍스트와 이미지로 공지를 올립니다. 이미지는 자동으로 축소 저장돼요.</li>
+          <li><b>❓ 아이스브레이킹</b> — 질문을 뽑습니다. 한 번 나온 질문은 다시 안 나오며, 초기화하면 전부 다시 나옵니다.</li>
+          <li><b>🗳️ 투표</b> — 주제와 선택지로 투표를 만들고 마감/재개할 수 있습니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>진행 팁</h3>
+        <ul class="items">
+          <li>호스트가 게임에 직접 참여하려면, 참가자 계정에 <b>본인 이름을 등록</b>한 뒤 <b>시크릿 창에서 게스트로도 로그인</b>하세요.</li>
+          <li>게임 데이터를 정리하려면 ⚙️ 관리 → 참가자 계정 하단의 <b>'게임 데이터 초기화'</b>를 쓰세요. 참가자 계정과 비밀번호는 유지됩니다.</li>
+        </ul>
+        <div class="callout">⚠️ 여러 사람이 동시에 호스트로 편집하면 마지막 저장이 우선됩니다. 편집은 한 사람이 맡는 게 안전해요.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="role admin" id="admin">
+    <div class="role-head">
+      <div class="ic">⚙️</div>
+      <div>
+        <h2>Admin</h2>
+        <div class="sub">시스템 관리자. 호스트의 모든 권한에 더해 백업·복원·시스템 초기화를 담당합니다</div>
+      </div>
+    </div>
+    <div class="role-body">
+      <div class="block">
+        <h3>입장하기</h3>
+        <ul class="items">
+          <li>로그인 화면에서 <b>Admin</b>을 선택하고 관리자 비밀번호를 입력합니다.</li>
+          <li>이 비밀번호는 서버 설정(<b>ADMIN_PASSWORD 환경변수</b>)으로 관리됩니다. 앱 데이터가 아니라 Cloudflare 설정이에요.</li>
+          <li>Admin으로 관리 카테고리에 들어가면 <b>🖥️ 시스템 탭</b>이 먼저 열립니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>시스템 (Admin 전용)</h3>
+        <ul class="items">
+          <li><b>🖥️ System Info</b> — 저장 용량, 참가자·공지·투표 수, 호스트 비번/테마 설정 여부를 확인합니다.</li>
+          <li><b>💾 백업(Export)</b> — 전체 데이터를 JSON 파일로 내려받습니다. MT가 끝난 뒤 아카이브로 보관할 수 있어요.</li>
+          <li><b>📥 복원(Import)</b> — 백업 JSON을 올려 그 시점 상태로 되돌립니다.</li>
+          <li><b>🔑 호스트 비번 초기화</b> — 호스트가 비번을 잊었을 때 초기화합니다. 다음 호스트 로그인 시 새 비번이 설정돼요.</li>
+          <li><b>💥 시스템 전체 초기화</b> — 참가자 계정까지 모두 삭제합니다. 새 MT를 시작할 때 사용하세요.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>테마 설정</h3>
+        <ul class="items">
+          <li><b>🎨 앱 테마</b> — 로그인 화면의 배경 이미지, 팀명, MT 기간, 장소를 설정합니다. 배경 이미지는 자동 축소됩니다.</li>
+          <li>설정 후 로그아웃하면 로그인 화면에서 "○○ MT에 오신 것을 환영합니다!" 문구와 함께 확인할 수 있어요.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>참가자 계정 관리</h3>
+        <ul class="items">
+          <li>Admin이 참가자 계정 탭을 열려면 <b>호스트 비밀번호</b>가 필요합니다 (개인정보 보호). 브라우저를 닫으면 다시 잠겨요.</li>
+          <li>이 잠금은 관리 화면에만 적용됩니다. 팀배정·정산 등 다른 화면과 백업 파일에는 이름이 포함됩니다.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <h3>게임 참여 팁</h3>
+        <ul class="items">
+          <li>Admin도 게임에 끼려면 참가자 계정에 이름을 등록하고, 시크릿 창에서 게스트로 로그인하면 됩니다.</li>
+          <li>세 역할은 로그인 단위로 구분되며, 시크릿 창이나 다른 브라우저로 여러 역할을 동시에 쓸 수 있습니다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>화면이 안 바뀌어요 / 최신 내용이 안 보여요</summary>
+      <p>화면은 10초마다 자동 갱신됩니다. 더 빨리 보려면 앱 상단의 🔄 버튼을 누르세요. 게스트에게는 호스트가 방금 한 작업이 몇 초 뒤에 반영됩니다.</p>
+    </details>
+    <details>
+      <summary>게스트 로그인이 "등록되지 않은 참가자"라고 나와요</summary>
+      <p>호스트가 참가자 계정에 그 이름을 먼저 등록해야 합니다. 이미 등록했다면 띄어쓰기나 오타가 없는지 확인하세요. 이름과 완전히 똑같이 입력해야 합니다.</p>
+    </details>
+    <details>
+      <summary>호스트 비밀번호를 잊어버렸어요</summary>
+      <p>Admin이 시스템 탭에서 '호스트 비밀번호 초기화'를 실행하면, 다음 호스트 로그인 때 새 비밀번호를 다시 정할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>한 사람이 호스트도 하고 게임에도 참여할 수 있나요</summary>
+      <p>가능합니다. 참가자 계정에 본인 이름을 등록한 뒤, 일반 창은 호스트로, 시크릿 창(또는 다른 브라우저)은 게스트로 로그인하면 됩니다. 로그인은 브라우저 단위로 구분됩니다.</p>
+    </details>
+    <details>
+      <summary>지난 MT 기록을 보관하고 싶어요</summary>
+      <p>Admin이 시스템 탭에서 'DB Export'로 전체 데이터를 JSON 파일로 내려받아 보관하면 됩니다. 나중에 'Import'로 그 파일을 올리면 당시 상태가 그대로 복원됩니다.</p>
+    </details>
+    <details>
+      <summary>다크 모드는 모두에게 적용되나요</summary>
+      <p>아니요. 다크 모드는 각자 기기에만 적용되는 개인 설정입니다. 🌙 버튼으로 언제든 켜고 끌 수 있어요.</p>
+    </details>
+  </div>
+
+  <footer>🏕️ MT 도우미 · 즐거운 MT 되세요!</footer>
+
+</div>
+</body>
+</html>

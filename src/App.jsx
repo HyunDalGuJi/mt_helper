@@ -71,7 +71,7 @@ const SUBS = {
     { key: "settle", label: "💸 N빵" }, { key: "sched", label: "📅 일정" },
   ],
   fun: [{ key: "notice", label: "📢 공지" }, { key: "ice", label: "❓ 아이스브레이킹" }, { key: "vote", label: "🗳️ 투표" }],
-  admin: [{ key: "members", label: "👤 참가자 계정" }, { key: "system", label: "🖥️ 시스템", adminOnly: true }],
+  admin: [{ key: "system", label: "🖥️ 시스템", adminOnly: true }, { key: "members", label: "👤 참가자 계정" }],
 };
 
 const CHOSUNG_SET = "ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ".split("");
